@@ -1,17 +1,40 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <div class="container mx-auto px-15">
+    <ul class="border rounded grid grid-cols-3 auto-rows-fr">
+      <li>
+        <div>
+          <img
+            class="w-full h-full object-cover"
+            :src="
+              'https://covers.openlibrary.org/b/isbn/' + testIsbn + '-M.jpg'
+            "
+            alt="Обложка"
+          />
+        </div>
+        <div>
+          <p>Название</p>
+          <p>Авторы</p>
+        </div>
+      </li>
+    </ul>
+  </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+// import HelloWorld from "./components/HelloWorld.vue";
+const axios = require("axios").default;
+console.log("axios", axios);
 
 export default {
-  name: 'App',
-  components: {
-    HelloWorld
-  }
-}
+  data() {
+    return { testIsbn: "9780375822070" };
+  },
+  name: "App",
+  components: {},
+  mounted() {
+    axios.get("https://openlibrary.org/search.json?q=mr+fox");
+  },
+};
 </script>
 
 <style>
