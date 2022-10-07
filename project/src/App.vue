@@ -6,9 +6,9 @@
                 <input :value="bookName" @input="setBookName($event)" type="text" name="bookname" id="bookname" class="mb-1 sm:mb-0 sm:mr-1 block px-3 py-2 bg-white border rounded-md text-sm shadow-sm focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500" placeholder="Название книги" />
                 <button class="px-3 h-10 transition bg-indigo-500 hover:bg-indigo-700 rounded text-white w-sm" @click="refreshBooks">Загрузить</button>
             </div>
-            <button class="mb-3 px-3 h-10 transition bg-indigo-500 hover:bg-indigo-700 rounded text-white" @click="showData">Выгрузить в Excel</button>
+            <button class="mb-3 px-3 h-10 transition bg-indigo-500 hover:bg-indigo-700 rounded text-white" @click="exportData">Выгрузить в Excel</button>
         </div>
-        <table id="booksTable" class="border-separate border-spacing-2 border border-slate-400">
+        <!-- <table id="booksTable" class="border-separate border-spacing-2 border border-slate-400">
             <thead>
                 <tr>
                     <th rowspan="2" class="border border-slate-300">№</th>
@@ -30,7 +30,7 @@
                     <td></td>
                 </tr>
             </tbody>
-        </table>
+        </table> -->
         <ul class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-x-3 gap-y-3">
             <li class="border rounded p-2 flex flex-col justify-between" v-for="book in books" :key="book.key">
                 <div class="mb-2">
@@ -47,6 +47,9 @@
 
 <script>
 // import HelloWorld from "./components/HelloWorld.vue";
+
+import XLSX from 'xlsx';
+
 const axios = require('axios').default;
 
 const sortByTitleAsc = (b1, b2) => {
@@ -63,6 +66,7 @@ export default {
             books: [],
             sortedAsc: false,
             bookName: '',
+            excelData: [],
         };
     },
     name: 'App',
@@ -72,14 +76,68 @@ export default {
             this.books = response.data.docs;
         });
     },
-    computed: {
-        // bookImage() {
-        //   return
-        // }
-    },
     methods: {
-        showData() {
-            console.log(this.books);
+        exportData() {
+            const booksData = this.books;
+            console.log('booksData', booksData);
+
+            if (booksData.length > 0) {
+                // STEP 1: Create a new workbook
+                const workbook = XLSX.utils.book_new();
+                console.log('workbook', workbook);
+
+                booksData.forEach((book, index) => {
+                    let rows = [];
+                    let authorFirstName = '';
+                    let authorLastName = '';
+
+                    if (typeof book.author_name != 'undefined' && book.author_name.length > 0) {
+                        let resFirstNames = [];
+                        let resLastNames = [];
+
+                        book.author_name.forEach((fullName) => {
+                            let tempArr = fullName.split(' ');
+                            resFirstNames.push(typeof tempArr[0] != 'undefined' ? tempArr[0] : '');
+                            resLastNames.push(typeof tempArr[1] != 'undefined' ? tempArr[1] : '');
+                        });
+
+                        authorFirstName = resFirstNames.join(' ');
+                        authorLastName = resLastNames.join(' ');
+                    }
+
+                    const rowObject = {
+                        bookIndex: index + 1,
+                        bookAuthorFirstName: authorFirstName,
+                        bookAuthorLastName: authorLastName,
+                        bookTitle: book.title,
+                        bookYear: book.first_publish_year,
+                    };
+
+                    rows.push(rowObject);
+                    this.excelData.push(rows);
+                });
+
+                console.log(this.excelData);
+
+                // STEP 2: Create data rows and styles
+                let row = [
+                    { v: 'Courier: 24', t: 's', s: { font: { name: 'Courier', sz: 24 } } },
+                    { v: 'bold & color', t: 's', s: { font: { bold: true, color: { rgb: 'FF0000' } } } },
+                    { v: 'fill: color', t: 's', s: { fill: { fgColor: { rgb: 'E9E9E9' } } } },
+                    { v: 'line\nbreak', t: 's', s: { alignment: { wrapText: true } } },
+                ];
+
+                // STEP 3: Create worksheet with rows; Add worksheet to workbook
+                const worksheet = XLSX.utils.aoa_to_sheet([row]); // принимает массив массивов значений JS и возвращает worksheet, похожий на входные данные.
+                console.log('worksheet1', worksheet);
+                XLSX.utils.book_append_sheet(workbook, worksheet, 'books'); // добавляет worksheet в workbook
+
+                console.log('workbook2', workbook);
+                console.log('worksheet2', worksheet);
+
+                // STEP 4: Write Excel file to browser
+                XLSX.writeFile(workbook, 'books.xlsx');
+            }
         },
         sortBooks() {
             if (!this.sortedAsc) {
