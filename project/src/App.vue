@@ -1,44 +1,23 @@
 <template>
     <div class="container mx-auto border rounded p-6 font-sans">
         <div class="flex flex-col items-start mb-3">
-            <custom-button button-text="Сортировать"></custom-button>
-            <button class="mb-3 px-3 h-10 transition bg-indigo-500 hover:bg-indigo-700 rounded text-white" @click="sortBooks" type="button">Сортировать</button>
-            <form class="flex flex-col sm:flex-row mb-3 items-start" @submit.prevent="refreshBooks">
+            <custom-button button-text="Сортировать" :button-function="'sort'" @sort-by-title="sortBooks"></custom-button>
+            <form class="flex flex-col sm:flex-row items-start" @submit.prevent="refreshBooks">
                 <input v-model="bookName" type="text" class="mb-1 sm:mb-0 sm:mr-1 block px-3 py-2 bg-white border rounded-md text-sm shadow-sm focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500" placeholder="Название книги" />
-                <button class="px-3 h-10 transition bg-indigo-500 hover:bg-indigo-700 rounded text-white w-sm" type="submit">Загрузить</button>
+                <custom-button button-text="Загрузить"></custom-button>
             </form>
-            <button class="mb-3 px-3 h-10 transition bg-indigo-500 hover:bg-indigo-700 rounded text-white" @click="exportBooks" type="button">Выгрузить в Excel</button>
+            <custom-button button-text="Выгрузить в Excel" :button-function="'export'" @export-books="exportBooks"></custom-button>
         </div>
-        <ul class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-            <li class="border rounded p-2 flex flex-col justify-between" v-for="book in books" :key="book.key">
-                <div class="mb-2">
-                    <img class="w-full h-full object-cover" :src="`https://covers.openlibrary.org/b/isbn/${checkExistedProperty(book.isbn) ? book.isbn[0] : ''}-M.jpg`" alt="Обложка" />
-                </div>
-                <div>
-                    <p class="text-lg font-bold italic leading-tight">{{ checkExistedProperty(book.title) ? book.title : '' }}</p>
-                    <p class="text-base font-medium leading-tight">
-                        {{ checkExistedProperty(book.author_name) ? book.author_name.toString() : '' }}
-                    </p>
-                </div>
-            </li>
+        <ul class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+            <custom-book v-for="book in books" :key="book.key" :book-isbn="book.isbn" :book-title="book.title" :book-author-name="book.author_name"></custom-book>
         </ul>
     </div>
 </template>
 
 <script>
-// import HelloWorld from "./components/HelloWorld.vue";
-
 import * as XLSX from 'xlsx';
 
 const axios = require('axios').default;
-
-const sortByTitleAsc = (b1, b2) => {
-    return b1.title.toLowerCase() > b2.title.toLowerCase() ? 1 : -1;
-};
-
-const sortByTitleDesc = (b1, b2) => {
-    return b1.title.toLowerCase() > b2.title.toLowerCase() ? -1 : 1;
-};
 
 export default {
     data() {
@@ -57,16 +36,20 @@ export default {
         });
     },
     methods: {
-        checkExistedProperty(prop) {
-            return typeof prop !== 'undefined' && prop.length > 0;
+        sortByTitleAsc(b1, b2) {
+            return b1.title.toLowerCase() > b2.title.toLowerCase() ? 1 : -1;
+        },
+        sortByTitleDesc(b1, b2) {
+            return b1.title.toLowerCase() > b2.title.toLowerCase() ? -1 : 1;
         },
         sortBooks() {
+            console.log('works');
             if (!this.sortedAsc) {
                 this.sortedAsc = true;
-                return this.books.sort(sortByTitleAsc);
+                return this.books.sort(this.sortByTitleAsc);
             } else {
                 this.sortedAsc = false;
-                return this.books.sort(sortByTitleDesc);
+                return this.books.sort(this.sortByTitleDesc);
             }
         },
         refreshBooks() {
