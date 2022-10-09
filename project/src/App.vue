@@ -70,6 +70,7 @@
 // import HelloWorld from "./components/HelloWorld.vue";
 
 import * as XLSX from "xlsx";
+// import font from "xlsx-style";
 
 const axios = require("axios").default;
 
@@ -104,10 +105,88 @@ export default {
       const booksData = this.books;
       console.log("booksData", booksData);
 
+      const firstHeaderRow = [
+        {
+          v: "№",
+          t: "s",
+          s: {
+            font: { bold: true, color: { rgb: "#7CFC00" } },
+          },
+        },
+        {
+          v: "Автор",
+          t: "s",
+          s: {
+            font: { bold: true, color: { rgb: "#7CFC00" } },
+          },
+        },
+        {
+          v: "",
+          t: "s",
+          s: {
+            font: { bold: true, color: { rgb: "7CFC00" } },
+          },
+        },
+        {
+          v: "Название книги",
+          t: "s",
+          s: {
+            font: { bold: true, color: { rgb: "7CFC00" } },
+          },
+        },
+        {
+          v: "Год публикации",
+          t: "s",
+          s: {
+            font: { bold: true, color: { rgb: "7CFC00" } },
+          },
+        },
+      ];
+
+      const secondHeaderRow = [
+        {
+          v: "",
+          t: "s",
+          s: {
+            font: { bold: true, color: { rgb: "#7CFC00" } },
+          },
+        },
+        {
+          v: "Имя",
+          t: "s",
+          s: {
+            font: { bold: true, color: { rgb: "#7CFC00" } },
+          },
+        },
+        {
+          v: "Фамилия",
+          t: "s",
+          s: {
+            font: { bold: true, color: { rgb: "7CFC00" } },
+          },
+        },
+        {
+          v: "",
+          t: "s",
+          s: {
+            font: { bold: true, color: { rgb: "7CFC00" } },
+          },
+        },
+        {
+          v: "",
+          t: "s",
+          s: {
+            font: { bold: true, color: { rgb: "7CFC00" } },
+          },
+        },
+      ];
+
+      this.excelData.push(firstHeaderRow);
+      this.excelData.push(secondHeaderRow);
+
       if (booksData.length > 0) {
         // STEP 1: Create a new workbook
         const workbook = XLSX.utils.book_new();
-        console.log("workbook", workbook);
 
         booksData.forEach((book, index) => {
           let row = [];
@@ -135,34 +214,11 @@ export default {
             authorLastName = resLastNames.join(" ");
           }
 
-          // const cellIndex = {
-          //   bookIndex: index + 1,
-          // };
-
-          // const cellAuthorFirstName = {
-          //   bookAuthorFirstName: authorFirstName,
-          // };
-
-          // const cellAuthorLastName = {
-          //   bookAuthorLastName: authorLastName,
-          // };
-          // const cellTitle = {
-          //   bookTitle: book.title,
-          // };
-
-          // const cellYear = {
-          //   bookYear: book.first_publish_year,
-          // };
-
           const cellIndex = {
             v: index + 1,
             t: "s",
             s: {
-              fill: {
-                patternType: "solid",
-                fgColor: "2172d7",
-                bgColor: "2172d7",
-              },
+              font: { bold: true, color: { rgb: "7CFC00" } },
             },
           };
 
@@ -177,16 +233,25 @@ export default {
           const cellAuthorLastName = {
             v: authorLastName,
             t: "s",
+            s: {
+              font: { bold: true },
+            },
           };
 
           const cellTitle = {
             v: book.title,
             t: "s",
+            s: {
+              font: { bold: true },
+            },
           };
 
           const cellYear = {
             v: book.first_publish_year,
             t: "s",
+            s: {
+              font: { bold: true },
+            },
           };
 
           row.push(cellIndex);
@@ -197,40 +262,16 @@ export default {
           this.excelData.push(row);
         });
 
-        console.log("data", this.excelData);
-        console.log("data", this.excelData[0]);
-        console.log(typeof this.excelData);
-
-        // STEP 2: Create data rows and styles
-        // let row = [
-        //   {
-        //     v: "Courier: 24",
-        //     t: "s",
-        //     s: { font: { name: "Courier", sz: 24 } },
-        //   },
-        //   {
-        //     v: "bold & color",
-        //     t: "s",
-        //     s: { font: { bold: true, color: { rgb: "FF0000" } } },
-        //   },
-        //   {
-        //     v: "fill: color",
-        //     t: "s",
-        //     s: { fill: { fgColor: { rgb: "E9E9E9" } } },
-        //   },
-        //   { v: "line\nbreak", t: "s", s: { alignment: { wrapText: true } } },
-        // ];
-
-        // STEP 3: Create worksheet with rows; Add worksheet to workbook
         const worksheet = XLSX.utils.aoa_to_sheet(this.excelData); // принимает массив массивов значений JS и возвращает worksheet, похожий на входные данные.
-        console.log("worksheet1", worksheet);
+
+        worksheet["!merges"] = [
+          { s: { r: 0, c: 0 }, e: { r: 1, c: 0 } },
+          { s: { r: 0, c: 1 }, e: { r: 0, c: 2 } },
+          { s: { r: 0, c: 3 }, e: { r: 1, c: 3 } },
+          { s: { r: 0, c: 4 }, e: { r: 1, c: 4 } },
+        ];
 
         XLSX.utils.book_append_sheet(workbook, worksheet, "books"); // добавляет worksheet в workbook
-
-        console.log("workbook2", workbook);
-        console.log("worksheet2", worksheet);
-
-        // STEP 4: Write Excel file to browser
         XLSX.writeFile(workbook, "books.xlsx");
       }
     },
