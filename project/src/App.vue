@@ -1,12 +1,13 @@
 <template>
     <div class="container mx-auto border rounded p-6 font-sans">
         <div class="flex flex-col items-start mb-3">
-            <button class="mb-3 px-3 h-10 transition bg-indigo-500 hover:bg-indigo-700 rounded text-white" @click="sortBooks">Сортировать</button>
-            <div class="flex flex-col sm:flex-row mb-3 items-start">
-                <input :value="bookName" @input="setBookName($event)" type="text" class="mb-1 sm:mb-0 sm:mr-1 block px-3 py-2 bg-white border rounded-md text-sm shadow-sm focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500" placeholder="Название книги" />
-                <button class="px-3 h-10 transition bg-indigo-500 hover:bg-indigo-700 rounded text-white w-sm" @click="refreshBooks">Загрузить</button>
-            </div>
-            <button class="mb-3 px-3 h-10 transition bg-indigo-500 hover:bg-indigo-700 rounded text-white" @click="exportBooks">Выгрузить в Excel</button>
+            <custom-button button-text="Сортировать"></custom-button>
+            <button class="mb-3 px-3 h-10 transition bg-indigo-500 hover:bg-indigo-700 rounded text-white" @click="sortBooks" type="button">Сортировать</button>
+            <form class="flex flex-col sm:flex-row mb-3 items-start" @submit.prevent="refreshBooks">
+                <input v-model="bookName" type="text" class="mb-1 sm:mb-0 sm:mr-1 block px-3 py-2 bg-white border rounded-md text-sm shadow-sm focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500" placeholder="Название книги" />
+                <button class="px-3 h-10 transition bg-indigo-500 hover:bg-indigo-700 rounded text-white w-sm" type="submit">Загрузить</button>
+            </form>
+            <button class="mb-3 px-3 h-10 transition bg-indigo-500 hover:bg-indigo-700 rounded text-white" @click="exportBooks" type="button">Выгрузить в Excel</button>
         </div>
         <ul class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
             <li class="border rounded p-2 flex flex-col justify-between" v-for="book in books" :key="book.key">
@@ -43,8 +44,8 @@ export default {
     data() {
         return {
             books: [],
-            sortedAsc: false,
             bookName: '',
+            sortedAsc: false,
             excelData: [],
         };
     },
@@ -67,9 +68,6 @@ export default {
                 this.sortedAsc = false;
                 return this.books.sort(sortByTitleDesc);
             }
-        },
-        setBookName(evt) {
-            this.bookName = evt.target.value;
         },
         refreshBooks() {
             if (this.bookName !== '')
@@ -188,8 +186,9 @@ export default {
                     this.excelData.push(row);
                 });
 
-                // Мердж ячеек
                 const worksheet = XLSX.utils.aoa_to_sheet(this.excelData);
+
+                // Мердж ячеек
                 worksheet['!merges'] = [
                     { s: { r: 0, c: 0 }, e: { r: 1, c: 0 } },
                     { s: { r: 0, c: 1 }, e: { r: 0, c: 2 } },
