@@ -1,12 +1,18 @@
 <template>
     <div class="container mx-auto border rounded p-6 font-sans">
         <div class="flex flex-col items-start border rounded mb-3 p-2">
-            <custom-button button-text="Сортировать" :button-function="'sort'" @sort-by-title="sortBooks"></custom-button>
+            <custom-button @click="sortBooks">
+                <span>Сортировать</span>
+            </custom-button>
             <form class="flex flex-col sm:flex-row items-start" @submit.prevent="refreshBooks">
                 <input v-model="bookName" type="text" class="mb-1 sm:mb-0 sm:mr-1 block px-3 py-2 bg-white border rounded-md text-sm shadow-sm focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500" placeholder="Название книги" />
-                <custom-button button-text="Загрузить"></custom-button>
+                <custom-button>
+                    <span>Загрузить</span>
+                </custom-button>
             </form>
-            <custom-button button-text="Выгрузить в Excel" :button-function="'export'" @export-books="exportBooks"></custom-button>
+            <custom-button @click="exportBooks">
+                <span>Выгрузить в Excel</span>
+            </custom-button>
         </div>
         <ul class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
             <custom-book v-for="book in books" :key="book.key" :book-isbn="book.isbn" :book-title="book.title" :book-author-name="book.author_name"></custom-book>
@@ -16,6 +22,8 @@
 
 <script>
 import * as XLSX from 'xlsx';
+
+import customButton from './components/CustomButton.vue';
 
 const axios = require('axios').default;
 
@@ -29,7 +37,7 @@ export default {
         };
     },
     name: 'App',
-    components: {},
+    components: { 'custom-button': customButton },
     mounted() {
         axios.get('https://openlibrary.org/search.json?q=mr+fox').then((response) => {
             this.books = response.data.docs;
@@ -43,7 +51,6 @@ export default {
             return b1.title.toLowerCase() > b2.title.toLowerCase() ? -1 : 1;
         },
         sortBooks() {
-            console.log('works');
             if (!this.sortedAsc) {
                 this.sortedAsc = true;
                 return this.books.sort(this.sortByTitleAsc);
