@@ -1,6 +1,6 @@
 <template>
     <div class="container mx-auto border rounded p-6 font-sans">
-        <div class="flex flex-col items-start mb-3 border border-b-indigo-500 p-2">
+        <div class="flex flex-col items-start border rounded mb-3 p-2">
             <custom-button button-text="Сортировать" :button-function="'sort'" @sort-by-title="sortBooks"></custom-button>
             <form class="flex flex-col sm:flex-row items-start" @submit.prevent="refreshBooks">
                 <input v-model="bookName" type="text" class="mb-1 sm:mb-0 sm:mr-1 block px-3 py-2 bg-white border rounded-md text-sm shadow-sm focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500" placeholder="Название книги" />
