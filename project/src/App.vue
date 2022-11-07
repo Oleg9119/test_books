@@ -23,7 +23,8 @@
 <script>
 import * as XLSX from 'xlsx';
 
-import customButton from './components/CustomButton.vue';
+import CustomButton from './components/CustomButton.vue';
+import CustomBook from './components/CustomBook.vue';
 
 const axios = require('axios').default;
 
@@ -37,7 +38,7 @@ export default {
         };
     },
     name: 'App',
-    components: { 'custom-button': customButton },
+    components: { CustomButton, CustomBook },
     mounted() {
         axios.get('https://openlibrary.org/search.json?q=mr+fox').then((response) => {
             this.books = response.data.docs;
