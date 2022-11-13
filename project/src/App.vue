@@ -31,43 +31,34 @@ const axios = require('axios').default;
 export default {
     data() {
         return {
-            books: [],
             bookName: '',
-            sortedAsc: false,
             excelData: [],
         };
     },
     name: 'App',
     components: { CustomButton, CustomBook },
+    computed: {
+        books() {
+            return this.$store.state.books;
+        },
+    },
     mounted() {
         axios.get('https://openlibrary.org/search.json?q=mr+fox').then((response) => {
-            this.books = response.data.docs;
+            this.$store.state.books = response.data.docs;
         });
     },
     methods: {
-        sortByTitleAsc(b1, b2) {
-            return b1.title.toLowerCase() > b2.title.toLowerCase() ? 1 : -1;
-        },
-        sortByTitleDesc(b1, b2) {
-            return b1.title.toLowerCase() > b2.title.toLowerCase() ? -1 : 1;
-        },
         sortBooks() {
-            if (!this.sortedAsc) {
-                this.sortedAsc = true;
-                return this.books.sort(this.sortByTitleAsc);
-            } else {
-                this.sortedAsc = false;
-                return this.books.sort(this.sortByTitleDesc);
-            }
+            this.$store.commit('sort');
         },
         refreshBooks() {
             if (this.bookName !== '')
                 axios.get(`https://openlibrary.org/search.json?q=${this.bookName}`).then((response) => {
-                    this.books = response.data.docs;
+                    this.$store.state.books = response.data.docs;
                 });
         },
         exportBooks() {
-            const booksData = this.books;
+            const booksData = this.$store.state.books;
 
             // Заголовок excel-таблицы
             const firstHeaderRow = [
