@@ -22,11 +22,8 @@
 
 <script>
 import * as XLSX from 'xlsx';
-
 import CustomButton from './components/CustomButton.vue';
 import CustomBook from './components/CustomBook.vue';
-
-const axios = require('axios').default;
 
 export default {
     data() {
@@ -39,26 +36,21 @@ export default {
     components: { CustomButton, CustomBook },
     computed: {
         books() {
-            return this.$store.state.books;
+            return this.$store.getters.booksList;
         },
     },
     mounted() {
-        axios.get('https://openlibrary.org/search.json?q=mr+fox').then((response) => {
-            this.$store.state.books = response.data.docs;
-        });
+        this.$store.dispatch('getBooksList');
     },
     methods: {
         sortBooks() {
-            this.$store.commit('sort');
+            this.$store.dispatch('sortBooksList');
         },
         refreshBooks() {
-            if (this.bookName !== '')
-                axios.get(`https://openlibrary.org/search.json?q=${this.bookName}`).then((response) => {
-                    this.$store.state.books = response.data.docs;
-                });
+            if (this.bookName !== '') this.$store.dispatch('refreshBooksList', this.bookName);
         },
         exportBooks() {
-            const booksData = this.$store.state.books;
+            const booksData = this.$store.getters.booksList;
 
             // Заголовок excel-таблицы
             const firstHeaderRow = [
